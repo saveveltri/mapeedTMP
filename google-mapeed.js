@@ -1,6 +1,4 @@
-/*script for google-mapeed*/
-function getTweetsInfo(callback,hashtag) {
-	console.log("entrato in getTweetsInfo");
+function getTweetsInfo(callback) {
   var cb = new Codebird;
   cb.setConsumerKey("WOQvNiKyH6zI9Psozm6QwTZ7v", "Ltjz6mH3cN0Ks4GwQzxeS8ck772PoY9Ss1tXDrDsSABXod2mGP");
   cb.setToken("21333319-pQ8bNbx1LvLwbFh4GSKrDzykRZlco241OnONx9Xzf", "RRP4iCLmtrhYzDMitwB4NjNlZQkSyhe9f98dU7K5XmhNT");
@@ -8,8 +6,7 @@ function getTweetsInfo(callback,hashtag) {
   console.log(cb)
   
   var params = {
-    q: hashtag,
-    // "#Quirinale2015",
+    q: "#Quirinale2015",
     result_type : "mixed",
     count: 100
 };
@@ -35,8 +32,7 @@ cb.__call(
         });
         
         
-        callback(results);
-
+        callback(results)
     }
 );
 }

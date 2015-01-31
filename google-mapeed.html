@@ -2,6 +2,9 @@
 
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../google-apis/google-apis.html">
+<script type="text/javascript" src="codebird.js"></script>
+<script type="text/javascript" src="google-mapeed.js"></script>
+<link rel="import" href="../paper-input/paper-input.html">
 
 
 <!--
@@ -35,7 +38,7 @@ Fired when the Maps API has fully loaded.
 
     #map {
       position: absolute;
-      top: 0;
+      top: 100px;
       right: 0;
       bottom: 0;
       left: 0;
@@ -44,17 +47,24 @@ Fired when the Maps API has fully loaded.
   </style>
 
   <google-maps-api apiKey="{{apiKey}}" version="{{version}}" on-api-load="{{mapApiLoaded}}" libraries="{{libraries}}" signedIn="{{signedIn}}"></google-maps-api>
+  
+  <paper-button on-tap='{{getTweets}}'>Loading...</paper-button>
 
   <div id="map"></div>
-
-  <content id="markers" select="google-map-marker"></content>
-
+<content></content>
 </template>
 <script>
 
   Polymer({
-  	
+    getTweets:function(){
+      var my = this;
+      
+      getTweetsInfo(function(data){
+        my.updateMarkers(data);
+      },"#NYC");
 
+    },
+    
     /**
      * A Maps API key. To obtain an API key, see developers.google.com/maps/documentation/javascript/tutorial#api_key.
      *
@@ -225,8 +235,8 @@ Fired when the Maps API has fully loaded.
       this.map = new google.maps.Map(this.$.map, this.getMapOptions());
       
       this.updateCenter();
-      this.updateMarkers();
-      this.addMapListeners();
+      // this.updateMarkers();
+      //this.addMapListeners();
 
       this.fire('google-map-ready');
     },
@@ -258,31 +268,55 @@ Fired when the Maps API has fully loaded.
       return mapOptions;
     },
 
-    updateMarkers: function() {
+    updateMarkers: function(data) {
     	console.log("entrato nel updateMarkers");
-    	// prodotto con http://geojson.io/
-      // this.map.data.loadGeoJson('map.geojson');
-      	// 45.465821, 9.185688 
-        var image = 'twitter-icon.png';
-      	var myLatlng = new google.maps.LatLng(45.465821,9.185688);
-      	var marker = new google.maps.Marker({
-            position: myLatlng,
-            map: this.map,
-            title:"Hello World!",
-            icon:image
-        });
+
+      var image = 'optimised.svg';
+      this.markers = [];
+
+      for (var i=0;i<data.length;i++) {
+          console.log(data[i].geo.coordinates[0] +"-"+
+            data[i].geo.coordinates[1]);
+          var latitude = data[i].geo.coordinates[0];
+          var longitude = data[i].geo.coordinates[1];
+          console.log("lat >> " + latitude);
+          var myLatLng = new google.maps.LatLng(latitude,longitude);
+          var marker = new google.maps.Marker({
+                  position: myLatLng,
+                  map: this.map
+                  // icon: image
+          });
+          this.markers.push(marker);
+      }
+      // Array.prototype.slice.call(
+      //     this.$.markers.getDistributedNodes());
+// var myLatLng = new google.maps.LatLng(45.4850609,9.2010204);
+//    var marker = new google.maps.Marker({
+//                   position: myLatLng,
+//                   map: this.map
+//                   // icon: image
+//           });
+//    this.markers.push(marker);
+      // prodotto con http://geojson.io/
+      
+       // this.map.data.loadGeoJson('map.geojson');
+       // var myLatLng = new google.maps.LatLng(-33.890542, 151.274856);
+  // var beachMarker = new google.maps.Marker({
+  //     position: myLatLng,
+  //     map: this.map,
+  //     icon: image
+  // });
 // TODO commentato png da caricare
 //       this.map.data.setStyle({
-//   icon: 'twitter-icon.png'
-  
+//   icon: 'optimised.svg'
 // });
-      this.markers = Array.prototype.slice.call(
-          this.$.markers.getDistributedNodes());
+      // this.markers = Array.prototype.slice.call(
+      //     this.$.markers.getDistributedNodes());
 
-      if (this.centerMarker) {
-        this.markers.push(this.centerMarker);
-        this.markers.push(marker);
-      }
+      // if (this.centerMarker) {
+      //   this.markers.push(this.centerMarker);
+
+      // }
 
       this.onMutation(this, this.updateMarkers); // Watch for future updates.
 
@@ -292,9 +326,9 @@ Fired when the Maps API has fully loaded.
           m.map = this.map;
         }
 
-        // if (this.fitToMarkers) {
-        //   this.fitToMarkersChanged();
-        // }
+        if (this.fitToMarkers) {
+          this.fitToMarkersChanged();
+        }
       }
     },
 
@@ -354,7 +388,9 @@ Fired when the Maps API has fully loaded.
         this.map.setZoom(Number(this.zoom));
       }
     },
-
+    tweetsChanged: function() {
+      console.log("tweetsChanged");
+    },
     maxZoomChanged: function() {
       if (this.map) {
         this.map.setOptions({maxZoom: Number(this.maxZoom)});
