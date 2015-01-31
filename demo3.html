@@ -1,0 +1,48 @@
+<!doctype html>
+<!-- Copyright (c) 2014 Google Inc. All rights reserved. -->
+<html>
+<head>
+    <title>My Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css">
+    <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
+</head>
+
+<body>
+    <div style="padding: 20px;">
+        <input id="query" type="text" value="blue angels" />
+        <input id="submit" type="button" value="Search" />
+    </div>
+    <div id="tweets" style="padding: 20px;">
+        Tweets will go here.
+    </div>
+
+</body>
+<script type="text/javascript">
+function searchTwitter(query) {
+    $.ajax({
+        url: 'https://api.twitter.com/1.1/search/tweets.json?q=' + jQuery.param(query),
+        dataType: 'jsonp',
+        success: function(data) {
+            var tweets = $('#tweets');
+            tweets.html('');
+            for (res in data['results']) {
+                tweets.append('<div>' + data['results'][res]['from_user'] + ' wrote: <p>' + data['results'][res]['text'] + '</p></div><br />');
+            }
+        }
+    });
+}
+
+$(document).ready(function() {
+    $('#submit').click(function() {
+        var params = {
+            q: $('#query').val(),
+            rpp: 5
+        };
+        // alert(jQuery.param(params));
+        searchTwitter(params);
+    });
+});
+</script>
+</html>
